@@ -382,22 +382,186 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/09/09/并发编程总结五/" >
+        <a class="abstract-title" href = "/2018/08/03/每月一牛客—数据库篇(2)/" >
             
-                <span>[Untitled Post]</span>
+                <span>每月一牛客———数据库篇（2）</span>
         </a>
         <div class="abstract-content">
-            并发编程总结五今天我从一篇博客上看到关于并发编程面试的15个问题，自己也是一个小菜，想通过查阅大量资料找出这15个问题的详细答案…
-1、现在有线程T1、T2和T3。你如何确保T2线程在T1之后执行，并且T3线程在T2之后执行？
-
-​    这个问题主要是考察 join( ) 方法的应用，如果一个线程A执行了 thread.join() 语句，其含义是：当前线程A等待 thread 线程终止之后才从 thread.join() 返回。也就是说，当线程A执行了线程thread的 join 方法时，会先执行线程thread中的内容，等待从join方法返回之后，才会继续执行线程A方法剩下的内容。...
+            SQL 题目2018.8.1
+数据库设计包括留个主要步骤：
+① 需求分析 
+需求收集和分析，得到用数据字典描述的数据需求，用数据流图描述的处理需求。 
+② 概念结构设计 
+对需求进行综合、归纳与抽象，形成一个独立于具体DBMS的概念模型（用E-R图表示）。
+ ③ 逻辑结构设计 
+将概念结构转换为某个DBMS所支持的数据模型（例如关系模型），并对其进行优化。 
+④ 物理结构设计 
+为逻辑数据模型选取一个最适合应用环境的物理结构（包括存储结构和存取方法）。 
+⑤ 数据库实施
+运用DBMS提供的数据语言（例如SQL）及其宿主语言（例如C），根据逻辑设计和物理设计的结果建立数据库，编制与调试应用...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/09/09</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/03</span>
             </div>
             <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/08/01/每日一牛客—数据库篇(2)/" >
+            
+                <span>每日一牛客————数据库篇(2)</span>
+        </a>
+        <div class="abstract-content">
+            数据库篇
+- 
+
+
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/01</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/08/01/每月一牛客—Java篇(2)/" >
+            
+                <span>每月一牛客-Java篇(2)</span>
+        </a>
+        <div class="abstract-content">
+            <h1 id="Java-题目"><a href="#Java-题目" class="headerlink" title="Java 题目"></a>Java 题目</h1><h2 id="2018-8-1"><a href="#2018-8-1" class="headerlink" title="2018.8.1"></a>2018.8.1</h2><ul>
+<li>通过HttpServletRequest.getParameter获取的参数由客户端浏览器和Web容器配置共同决定编码</li>
+<li>方法的重写两同两小一大原则：<ul>
+<li>方法名相同，参数类型相同</li>
+<li>子类返回类型小于等于父类方法返回类型</li>
+<li>子类抛出异常小于等于父类方法抛出异常</li>
+<li>子类访问权限大于等于父类方法访问权限</li>
+</ul>
+</li>
+</ul>
+<hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/01</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/07/24/每月一牛客—数据库篇(1)/" >
+            
+                <span>每月一牛客——数据库篇(1)</span>
+        </a>
+        <div class="abstract-content">
+            <h1 id="Sql-题目"><a href="#Sql-题目" class="headerlink" title="Sql 题目"></a>Sql 题目</h1><h2 id="2018-7-24"><a href="#2018-7-24" class="headerlink" title="2018-7-24"></a>2018-7-24</h2><ul>
+<li><p>数据库系统的特点</p>
+<ul>
+<li>共享性：因为数据是面向整体的，所以数据可以被多个用户、多个应用程序共享使用，可以大大减少数据冗余，节约存储空间，避免数据之间的不相容性与不一致性。</li>
+<li>独立性：数据独立性包括数据的物理独立性和逻辑独立性<ul>
+<li>物理独立性：指数据在磁盘上的数据库中如何存储是由DBMS管理的，用户程序不需要了解，应用程序要处理的知识数据的逻辑结构，这样一来当数据的物理存储结构改变时，用户的程序不用改变。</li>
+<li>逻辑独立性：指用户的应用程序与数据库的逻辑结构是相互独立的，也就是说，数据的逻辑结构改变了，用户程序也可以不改变。</li>
+</ul>
+</li>
+<li>结构化：数据库系统实现了整体数据的结构化，这是数据库最主要的特征之一。整体结构化是指在数据库中的数据不再仅针对某个应用，而是面向全组织；不仅数据内部是结构化，而且整体式结构化，数据之间有联系。</li>
+</ul>
+</li>
+</ul>
+<hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/24</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/07/15/每月一牛客—Java篇(1)/" >
+            
+                <span>每月一牛客—Java篇(1)</span>
+        </a>
+        <div class="abstract-content">
+            <h1 id="Java-题目"><a href="#Java-题目" class="headerlink" title="Java 题目"></a>Java 题目</h1><h2 id="2018-7-15"><a href="#2018-7-15" class="headerlink" title="2018.7.15"></a>2018.7.15</h2><ul>
+<li><p>多个线程可同时操作一个数据，为了保证该数据的准确性，可将操作数据的部分改为 <strong>同步</strong></p>
+<ul>
+<li>同步：进程之间的关系不是相互排除临界资源的关系，而是相互依赖的关系。进一步说明就是前一个进程的输出作为后一个进程的输入，当第一个进程没有输出时第二个进程必须等待。具有同步关系的一组并发进程相互发送的信息称为消息或事件。</li>
+<li>异步：异步和同步是相对的，同步就是顺序执行，执行完一个再执行下一个，需要等待、协调运行。异步就是彼此独立,在等待某事件的过程中继续做自己的事，不需要等待这一事件完成后再工作。线程就是实现异步的一个方式。异步是让调用方法的主线程不需要同步等待另一线程的完成，从而可以让主线程干其它的事情。<br>   异步和多线程并不是一个同等关系,异步是最终目的,多线程只是我们实现异步的一种手段。异步是当一个调用请求发送给被调用者,而调用者不用等待其结果的返回而可以做其它的事情。实现异步可以采用多线程技术或则交给另外的进程来处理。</li>
+</ul>
+</li>
+</ul>
+<hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/15</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+    
+</div>
             
         </div>
     </article>

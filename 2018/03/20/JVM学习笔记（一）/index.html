@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Wilder Gao">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Wilder Gao">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>JVM学习笔记（一）：字节码的编译原理 · fi3ework&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >fi3ework&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">JVM学习笔记（一）：字节码的编译原理</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>fi3ework's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            JVM学习笔记（一）：字节码的编译原理
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM学习笔记">JVM学习笔记</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">2.4k</span>阅读时长: <span class="post-count reading-time">8 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/03/20</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <hr>
+<a id="more"></a>
+<h1 id="JVM：字节码的编译原理"><a href="#JVM：字节码的编译原理" class="headerlink" title="JVM：字节码的编译原理"></a>JVM：字节码的编译原理</h1><p>​     JVM 并不会与 Java 语言 “ 终生绑定 ” ，任何语言编写的程序都可以运行在 JVM 中，前提是源码的编译结果满足并包含 Java 虚拟机的内部指令集、符号表以及其它的辅助信息，它就是一个有效的字节码文件，就能被虚拟机所识别并装载运行。</p>
+<p>​    Java 源码编译为字节码时所要经历的步骤为：词法解析 –&gt; 语法解析 –&gt; 语义解析 –&gt; 生成字节码</p>
+<ul>
+<li>词法解析 ：词法解析就是将 Java 源码中的关键字和标示符等内容转换为符合 Java 语法规范的 Token 序列，然后按照指定的顺序规则进行匹配校验（所谓的关键字指的是 public ， private等关键字）；</li>
+<li>语法解析：语法解析就是将词法解析后的 Token序列整合为一棵结构化的抽象语法树；</li>
+<li>语义解析：语义解析的目的就是为了将之前语法解析步骤所产生的语法树扩充得更加完善，后续编译器将会使用语义解析后的语法树来生成字节码</li>
+</ul>
+<h2 id="词法解析步骤"><a href="#词法解析步骤" class="headerlink" title="词法解析步骤"></a>词法解析步骤</h2><p>​    词法解析器的主要任务就是将 Java 源码中的关键字和标识符等内容转换为符合 Java 语法规范的 Token 序列，为之后的语法解析步骤做准备</p>
+<p><img src="https://img-blog.csdn.net/20180323161721877?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MDk1MDk0/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" alt="编译过程"></p>
+<p>​    如图所示的词法解析过程，我们要知道 Scanner 是主要任务是按照<strong>单个字符的方式</strong> 读取源文件中的标示符等内容。 但是 Scanner 的任务只是读取源码的字符集合，但是解析的主要步骤交给 JavacParser 来解决，主要调用了 parseCompilationUnit ( ) 方法 ；nextToken ( ) 方法则读取一个个字符交给 JavaParser 转换为 Token 序列。</p>
+<h3 id="Token-序列"><a href="#Token-序列" class="headerlink" title="Token 序列"></a>Token 序列</h3><p>​    Token 究竟是什么呢？其实 Token 无非就是一组对应源码字符集合的单词序列。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">EOF,</span><br><span class="line">  ERROR,</span><br><span class="line">  IDENTIFIER.</span><br><span class="line">  ABSTRACT(<span class="string">"abstract"</span>),</span><br><span class="line">  ASSERT(<span class="string">"assert"</span>),</span><br><span class="line">  BOOLEAN(<span class="string">"boolean"</span>),</span><br><span class="line">  ......</span><br><span class="line">  PACKAGE(<span class="string">"package"</span>),</span><br><span class="line">  ......</span><br></pre></td></tr></table></figure>
+<h3 id="源码字符集合与-Token-之间的对一个关系"><a href="#源码字符集合与-Token-之间的对一个关系" class="headerlink" title="源码字符集合与 Token 之间的对一个关系"></a>源码字符集合与 Token 之间的对一个关系</h3><p>​    看了《 Java 虚拟机精讲 》之后，我自己对这两者的关系的理解大概如下：</p>
+<ul>
+<li>源码字符集合在转换为 Token序列之前会先将被一个字符转换为对应的 Name 对象，也就是说每一个字符会对应一个 Name 对象。</li>
+<li>负责实际 Token 转换的 Keywords 会将 Token 常量转换为 Name 对象，并将 Token 的信息储存在 Name 对象内部的 Table 类中</li>
+<li>这样的话源码字符和 Token 通过了 Name 对象就有了一定的关系</li>
+<li>用 Keywords 类中的数组 key 用于保存源码字符集合与 Token 之间的对应关系</li>
+</ul>
+<h3 id="调用-key-方法获取指定-Token"><a href="#调用-key-方法获取指定-Token" class="headerlink" title="调用 key( ) 方法获取指定 Token"></a>调用 key( ) 方法获取指定 Token</h3><p>​    每一个源码字符集合其实就是一个 Name 对象，一旦源码字符集合与 Token 之间成功构建起对应关系之后，当词法解析期调用 Keywords 类的 key( ) 方法时，传入与 Token 对应的 Name 对象就可以成功获取指定的 Token：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Token <span class="title">key</span> <span class="params">(Name name)</span> </span>&#123;</span><br><span class="line">  	<span class="keyword">return</span> (name.getIndex() &gt; maxKey) ? IDENTIFIER : key[name.getIndex()];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    源码字符集合与 Token 之间的对应关系就保存在数组 key 中，其中 Name 类的 getIndex( ) 方法用于返回 Name 对象当前索引，通过这个索引就可以从数组 key 中获取他们的 Token。</p>
+<h3 id="调用-nextToken-计算-Token-的获取规则"><a href="#调用-nextToken-计算-Token-的获取规则" class="headerlink" title="调用 nextToken( )计算 Token 的获取规则"></a>调用 nextToken( )计算 Token 的获取规则</h3><p>​    当成功获取到指定的 Token 后，JavacParser 类就会匹配当前的第一个 Token 是否匹配 Token.PACKAGE ，如果匹配成功的话，再由词法解析期获取下一个 Token ，继续匹配是否是 Token.IDENTIFIER（标识符） ，接下来再匹配 Token.DOT（点） 、 Token.IDENTIFIER 和 Token.SEMI（分号）。这样的话，一个完整的 package 关键字声明就解析完成。</p>
+<p><strong>最后，调用 parseCompilationUnit( ) 方法进行匹配，当然 Token 的匹配顺序和 Token 的读取顺序要保持一致，parseCompilationUnit ( ) 方法会将 Token 序列整合为一棵结构化的抽象语法树。 </strong></p>
+<h2 id="语法解析步骤"><a href="#语法解析步骤" class="headerlink" title="语法解析步骤"></a>语法解析步骤</h2><p>​    根据我的理解，语法解析的步骤起始也是在 parseCompilationUnit ( )方法中实现的，其实 parseCompilationUnit ( ) 里面调用了词法解析，语法解析，语义解析和生成字节码四个步骤的方法。怎么说呢，在词法解析之后，源码字符集变成了一个个 Token 序列，但是这些序列都是单一的没有任何的关联，通过语法解析，将匹配后的 Token 序列整合为一棵结构化的抽象语法树。比如说 try … catch 需要联系起来等情况。我们一起来看一下</p>
+<p>​    语法解析中一个重要的类就是 JCTree 类，它实际上与语法树中的每一个语法结点保持着密不可分的关系，因为语法树中的每一个语法结点实际上都直接或者间接地继承了 JCTree 类，并且这些语法结点对象都以静态内部类的形式定义在类中。根据理解我画出了关系图：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">st=&gt;operation: Token</span><br><span class="line">op=&gt;operation: 语法结点</span><br><span class="line">cond=&gt;operation: JCTree 类</span><br><span class="line">achieve=&gt;condition:实现对应 Tree 接口</span><br><span class="line">e=&gt;end</span><br><span class="line">st-&gt;op-&gt;cond-&gt;e</span><br><span class="line">achieve(yes)</span><br><span class="line">cond(no)-&gt;op</span><br></pre></td></tr></table></figure>
+<h3 id="调用-qualident-方法解析-package-语法结点"><a href="#调用-qualident-方法解析-package-语法结点" class="headerlink" title="调用 qualident ( ) 方法解析 package 语法结点"></a>调用 qualident ( ) 方法解析 package 语法结点</h3><p>​    当词法解析器成功地将 package 关键字声明转换为 Token 并完成词法解析后，就会调用 qualident ( ) 方法根据 Token.PACKAGE 解析为 package 语法结点</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> JCExpression <span class="title">qualident</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">/* 解析为 JCIdent 语法结点*/</span></span><br><span class="line">  JCExpression t = toP (F.at(S.pos()).Ident(ident())) ;</span><br><span class="line">  <span class="keyword">while</span> (S.token() == DOT)&#123;</span><br><span class="line">    <span class="keyword">int</span> pos = S.pos();</span><br><span class="line">    S.nextToken();</span><br><span class="line">    <span class="comment">/* 解析为 JCFieldAccess 语法节点*/</span></span><br><span class="line">    t = toP(F.at(pos).Select(t,ident()));</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    上述代码中，假如 package 声明的关键字只有一级目录的时候就会调用 Ident( ) 方法将它解析成为一个 JCIdent 语法结点；反之当 package 关键字声明中有多级目录时，qualident( ) 方法就会通过循环迭代的方式调用语法解析器将 package 关键字声明解析为嵌套的 JCFieldAccess 语法结点，接下来我们来看看这两个方法的源代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> JCIdent <span class="title">Ident</span> <span class="params">(Name name)</span></span>&#123;</span><br><span class="line">  JCIdent tree = <span class="keyword">new</span> JCIdent(name , <span class="keyword">null</span>);</span><br><span class="line">  tree.pos = pos;</span><br><span class="line">  <span class="keyword">return</span> tree;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> JCFieldAccess <span class="title">Select</span><span class="params">(JCExpression selected, Name selector)</span></span>&#123;</span><br><span class="line">  <span class="comment">// 根据Name 对象解析出嵌套 JCFieldAccess 语法结点</span></span><br><span class="line">  JCFieldAccess tree = <span class="keyword">new</span> JCFieldAccess(selected, selector, <span class="keyword">null</span>);</span><br><span class="line">  tree.pos = pos;</span><br><span class="line">  <span class="keyword">return</span> tree;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    我们可以看到，JCIdent 和 JCFieldAccess 的方法参数需要的是 Name 对象，也就是说在解析语法树或者语法节点时，首先需要将 Token 转换为对应的 Name 对象。也就是说，调用 ident( ) 方法会返回一个与 Token 对应的 Name 对象。</p>
+<h3 id="调用-importDeclaration-方法解析-import-语法树"><a href="#调用-importDeclaration-方法解析-import-语法树" class="headerlink" title="调用 importDeclaration( ) 方法解析 import 语法树"></a>调用 importDeclaration( ) 方法解析 import 语法树</h3><p>​    调用 importDeclaration ( ) 方法的步骤和解析package 语法结点是一样的，当 import 关键字声明中只有一层目录时就调用 Ident( ) 解析出一个 JCIdent 语法结点，如果是多级目录的话就调用 Select( ) 方法解析成为嵌套的 JCFieldAccess 语法节点。有一个需要注意的是 import 解析时会先判断是否有 Token.STATIC 匹配，检测 import 关键字声明中是否包含 static 静态导入。</p>
+<p>​    import 解析完成之后，将会调用 Import ( ) 方法，将之前解析过的语法节点整合成一棵 JCImport 语法树。</p>
+<p>​    </p>
+<h3 id="调用-classDeclaration-方法解析-class-语法树"><a href="#调用-classDeclaration-方法解析-class-语法树" class="headerlink" title="调用 classDeclaration ( ) 方法解析 class 语法树"></a>调用 classDeclaration ( ) 方法解析 class 语法树</h3><p>​    当词法解析器成功将 import 关键字解析并整合成 JCImport 语法树后，在 parseCompilationUnit ( ) 方法内部就会通过 typeDeclaration( ) 方法调用 classOrInterfaceOrEnumDeclaration( ) 方法将 class 主体信息解析为一棵 JCClassDecl 语法树。从这个方法名可以看出，方法中在检验的时候会考虑到 class 、interface 、 enum 三种情况的校验，并且还要注意的就是不管是class、interface 还是 enum 最后都是解析成一棵 JCClassDecl 语法树。大致的理解就是这样子…</p>
+<p>​    </p>
+<p>​    当将 class 部分整合成一棵 JCClassDecl 语法树之后，parseCompilationUnit( ) 方法就会调用语法解析器的 TopLevel ( ) 将之前解析过的 package、import 和 class 语法树等内容信息全部整合成一棵 JCCompilationUnit 语法树。</p>
+<p><img src="https://img-blog.csdn.net/20180323161833203?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MDk1MDk0/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" alt="生成树模型"></p>
+<h2 id="语义解析步骤"><a href="#语义解析步骤" class="headerlink" title="语义解析步骤"></a>语义解析步骤</h2><p>​    经过语法解析后的语法树还不够完善，主要会经历的操作如下：</p>
+<ul>
+<li><p>为没有构造方法的类型添加缺省的无参构造方法</p>
+</li>
+<li><p>检查任何类型的变量在使用前是否都已经经历过初始化</p>
+</li>
+<li><p>检查变量类型是否与值匹配</p>
+</li>
+<li><p>将 String 类型的常量进行合并处理</p>
+</li>
+<li><p>检查代码中的所有操作语句是否可达</p>
+</li>
+<li><p>异常检查</p>
+</li>
+<li><p>解除 Java 语法糖</p>
+<p>经历过一系列的语义解析步骤之后，就构成了一个完善的编译前提</p>
+</li>
+</ul>
+<h2 id="生成字节码"><a href="#生成字节码" class="headerlink" title="生成字节码"></a>生成字节码</h2><p>​    javac编译器最后的任务就是调用 Gen 类将这棵语法树编译为 Java 字节码文件。所谓的编译字节码，就是将符合 Java 语法规范的 Java 代码转换为符合 JVM 规范的字节码文件。在此需要注意的是：JVM 的架构模型是基于栈的，在 JVM 中所有的操作都需要经过入栈和岀栈来完成。</p>
+<p>好啦~大概的内容就到这里了，至于后面 JVM 的架构模型这一部分将在后面的章节进行整理</p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://wildergao.github.io">Wilder Gao</a>
+            <p>原文链接：<a href="http://wildergao.github.io/2018/03/20/JVM学习笔记（一）/">http://wildergao.github.io/2018/03/20/JVM学习笔记（一）/</a>
+            <p>发表日期：<a href="http://wildergao.github.io/2018/03/20/JVM学习笔记（一）/">March 20th 2018, 4:41:13 pm</a>
+            <p>更新日期：<a href="http://wildergao.github.io/2018/03/20/JVM学习笔记（一）/">March 23rd 2018, 4:19:16 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/04/24/关于线程的一些总结/" title= "关于线程的一些总结">
+                    <div class="nextTitle">关于线程的一些总结</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/03/10/netty总结三/" title= "netty总结三">
+                    <div class="prevTitle">netty总结三</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:12345@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/fi3ework" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/example_qr.png" />
+                </span>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JVM：字节码的编译原理"><span class="toc-number">1.</span> <span class="toc-text">JVM：字节码的编译原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#词法解析步骤"><span class="toc-number">1.1.</span> <span class="toc-text">词法解析步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Token-序列"><span class="toc-number">1.1.1.</span> <span class="toc-text">Token 序列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#源码字符集合与-Token-之间的对一个关系"><span class="toc-number">1.1.2.</span> <span class="toc-text">源码字符集合与 Token 之间的对一个关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#调用-key-方法获取指定-Token"><span class="toc-number">1.1.3.</span> <span class="toc-text">调用 key( ) 方法获取指定 Token</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#调用-nextToken-计算-Token-的获取规则"><span class="toc-number">1.1.4.</span> <span class="toc-text">调用 nextToken( )计算 Token 的获取规则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#语法解析步骤"><span class="toc-number">1.2.</span> <span class="toc-text">语法解析步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#调用-qualident-方法解析-package-语法结点"><span class="toc-number">1.2.1.</span> <span class="toc-text">调用 qualident ( ) 方法解析 package 语法结点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#调用-importDeclaration-方法解析-import-语法树"><span class="toc-number">1.2.2.</span> <span class="toc-text">调用 importDeclaration( ) 方法解析 import 语法树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#调用-classDeclaration-方法解析-class-语法树"><span class="toc-number">1.2.3.</span> <span class="toc-text">调用 classDeclaration ( ) 方法解析 class 语法树</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#语义解析步骤"><span class="toc-number">1.3.</span> <span class="toc-text">语义解析步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成字节码"><span class="toc-number">1.4.</span> <span class="toc-text">生成字节码</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 22
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span><a class="archive-post-title" href= "/2018/09/16/每月一牛客—并发篇(1)/" >每月一牛客———并发篇（2）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/09</span><a class="archive-post-title" href= "/2018/09/09/并发编程总结五/" >[Untitled Post]</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/03</span><a class="archive-post-title" href= "/2018/08/03/每月一牛客—数据库篇(2)/" >每月一牛客———数据库篇（2）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href= "/2018/08/01/每日一牛客—数据库篇(2)/" >每日一牛客————数据库篇(2)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href= "/2018/08/01/每月一牛客—Java篇(2)/" >每月一牛客-Java篇(2)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/24</span><a class="archive-post-title" href= "/2018/07/24/每月一牛客—数据库篇(1)/" >每月一牛客——数据库篇(1)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/21</span><a class="archive-post-title" href= "/2018/07/21/JVM学习笔记（二）/" >JVM学习笔记（二）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/15</span><a class="archive-post-title" href= "/2018/07/15/每月一牛客—Java篇(1)/" >每月一牛客—Java篇(1)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span><a class="archive-post-title" href= "/2018/06/04/JVM学习笔记-GC（3）/" >JVM学习笔记-GC（3）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/29</span><a class="archive-post-title" href= "/2018/05/29/JVM学习笔记-GC（2）/" >JVM学习笔记:GC(2)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/28</span><a class="archive-post-title" href= "/2018/05/28/JVM学习笔记-GC（1）/" >JVM学习笔记: GC（1）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span><a class="archive-post-title" href= "/2018/04/24/关于线程的一些总结/" >关于线程的一些总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/2018/03/20/JVM学习笔记（一）/" >JVM学习笔记（一）：字节码的编译原理</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/2018/03/10/netty总结三/" >netty总结三</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/05</span><a class="archive-post-title" href= "/2018/03/05/netty总结二/" >netty总结二</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/20</span><a class="archive-post-title" href= "/2018/02/20/并发编程总结三/" >并发编程总结三</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href= "/2018/02/18/netty-总结一/" >netty 总结一</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/12</span><a class="archive-post-title" href= "/2018/02/12/Lumbda表达式常见例子/" >Lambda表达式常见例子</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/12</span><a class="archive-post-title" href= "/2018/02/12/并发编程总结四/" >并发编程总结四</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/2018/02/06/SpringBoot实现限制IP访问次数/" >SpringBoot实现限制IP访问次数</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/2018/02/06/并发编程总结一/" >并发编程总结一</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/05</span><a class="archive-post-title" href= "/2018/02/05/并发编程总结二/" >并发编程总结二</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="JVM学习笔记"><span class="iconfont-archer">&#xe606;</span>JVM学习笔记</span>
+    
+        <span class="sidebar-tag-name" data-tags="SpringBoot"><span class="iconfont-archer">&#xe606;</span>SpringBoot</span>
+    
+        <span class="sidebar-tag-name" data-tags="Java小技巧"><span class="iconfont-archer">&#xe606;</span>Java小技巧</span>
+    
+        <span class="sidebar-tag-name" data-tags="Netty 我有话说"><span class="iconfont-archer">&#xe606;</span>Netty 我有话说</span>
+    
+        <span class="sidebar-tag-name" data-tags="并发"><span class="iconfont-archer">&#xe606;</span>并发</span>
+    
+        <span class="sidebar-tag-name" data-tags="刷题之路"><span class="iconfont-archer">&#xe606;</span>刷题之路</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Wilder Gao"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

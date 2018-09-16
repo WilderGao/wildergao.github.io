@@ -346,24 +346,28 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/09/16/每月一牛客—并发篇(1)/" >
+        <a class="abstract-title" href = "/2018/08/03/每月一牛客—数据库篇(2)/" >
             
-                <span>每月一牛客———并发篇（2）</span>
+                <span>每月一牛客———数据库篇（2）</span>
         </a>
         <div class="abstract-content">
-            SQL 题目2018.9.16
-轮询调度和可抢占式调度
-轮询调度的原理是每一次把来自用户的请求轮流分配给内部中的服务器，从1开始直到N（内部服务器的个数），然后重新开始循环。只有在当前任务主动放弃CPU控制权的情况下（比如任务挂起），才允许其它任务（包括高优先级的任务）控制CPU。它的优点是简洁性，它无需记录当前所有连接的状态，所以它是一种无状态调度，但不利于后面的请求及时得到响应。
-抢占式调度允许高优先级的任务打断当前执行的任务，抢占CPU的控制权。这有利于后面的高优先级任务也能及时得到响应。但实现相对比较复杂且可能出现低优先级的任务长期得不到调度。
-
-
-产生死锁的主要原因
-系统资源不...
+            SQL 题目2018.8.1
+数据库设计包括留个主要步骤：
+① 需求分析 
+需求收集和分析，得到用数据字典描述的数据需求，用数据流图描述的处理需求。 
+② 概念结构设计 
+对需求进行综合、归纳与抽象，形成一个独立于具体DBMS的概念模型（用E-R图表示）。
+ ③ 逻辑结构设计 
+将概念结构转换为某个DBMS所支持的数据模型（例如关系模型），并对其进行优化。 
+④ 物理结构设计 
+为逻辑数据模型选取一个最适合应用环境的物理结构（包括存储结构和存取方法）。 
+⑤ 数据库实施
+运用DBMS提供的数据语言（例如SQL）及其宿主语言（例如C），根据逻辑设计和物理设计的结果建立数据库，编制与调试应用...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/09/16</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/03</span>
             </div>
             <!-- tags  -->
             
@@ -382,22 +386,67 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/09/09/并发编程总结五/" >
+        <a class="abstract-title" href = "/2018/08/01/每日一牛客—数据库篇(2)/" >
             
-                <span>[Untitled Post]</span>
+                <span>每日一牛客————数据库篇(2)</span>
         </a>
         <div class="abstract-content">
-            并发编程总结五今天我从一篇博客上看到关于并发编程面试的15个问题，自己也是一个小菜，想通过查阅大量资料找出这15个问题的详细答案…
-1、现在有线程T1、T2和T3。你如何确保T2线程在T1之后执行，并且T3线程在T2之后执行？
+            数据库篇
+- 
 
-​    这个问题主要是考察 join( ) 方法的应用，如果一个线程A执行了 thread.join() 语句，其含义是：当前线程A等待 thread 线程终止之后才从 thread.join() 返回。也就是说，当线程A执行了线程thread的 join 方法时，会先执行线程thread中的内容，等待从join方法返回之后，才会继续执行线程A方法剩下的内容。...
+
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/09/09</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/01</span>
             </div>
             <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/08/01/每月一牛客—Java篇(2)/" >
+            
+                <span>每月一牛客-Java篇(2)</span>
+        </a>
+        <div class="abstract-content">
+            <h1 id="Java-题目"><a href="#Java-题目" class="headerlink" title="Java 题目"></a>Java 题目</h1><h2 id="2018-8-1"><a href="#2018-8-1" class="headerlink" title="2018.8.1"></a>2018.8.1</h2><ul>
+<li>通过HttpServletRequest.getParameter获取的参数由客户端浏览器和Web容器配置共同决定编码</li>
+<li>方法的重写两同两小一大原则：<ul>
+<li>方法名相同，参数类型相同</li>
+<li>子类返回类型小于等于父类方法返回类型</li>
+<li>子类抛出异常小于等于父类方法抛出异常</li>
+<li>子类访问权限大于等于父类方法访问权限</li>
+</ul>
+</li>
+</ul>
+<hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/01</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+    
+</div>
             
         </div>
     </article>

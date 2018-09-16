@@ -346,30 +346,23 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/09/16/每月一牛客—并发篇(1)/" >
+        <a class="abstract-title" href = "/2018/07/21/JVM学习笔记（二）/" >
             
-                <span>每月一牛客———并发篇（2）</span>
+                <span>JVM学习笔记（二）</span>
         </a>
         <div class="abstract-content">
-            SQL 题目2018.9.16
-轮询调度和可抢占式调度
-轮询调度的原理是每一次把来自用户的请求轮流分配给内部中的服务器，从1开始直到N（内部服务器的个数），然后重新开始循环。只有在当前任务主动放弃CPU控制权的情况下（比如任务挂起），才允许其它任务（包括高优先级的任务）控制CPU。它的优点是简洁性，它无需记录当前所有连接的状态，所以它是一种无状态调度，但不利于后面的请求及时得到响应。
-抢占式调度允许高优先级的任务打断当前执行的任务，抢占CPU的控制权。这有利于后面的高优先级任务也能及时得到响应。但实现相对比较复杂且可能出现低优先级的任务长期得不到调度。
-
-
-产生死锁的主要原因
-系统资源不...
+            <hr>
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/09/16</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/21</span>
             </div>
             <!-- tags  -->
             
             <div class= abstract-tags >
     
-        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM学习笔记">JVM学习笔记</a>
     
 </div>
             
@@ -382,22 +375,112 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/09/09/并发编程总结五/" >
+        <a class="abstract-title" href = "/2018/06/04/JVM学习笔记-GC（3）/" >
             
-                <span>[Untitled Post]</span>
+                <span>JVM学习笔记-GC（3）</span>
         </a>
         <div class="abstract-content">
-            并发编程总结五今天我从一篇博客上看到关于并发编程面试的15个问题，自己也是一个小菜，想通过查阅大量资料找出这15个问题的详细答案…
-1、现在有线程T1、T2和T3。你如何确保T2线程在T1之后执行，并且T3线程在T2之后执行？
-
-​    这个问题主要是考察 join( ) 方法的应用，如果一个线程A执行了 thread.join() 语句，其含义是：当前线程A等待 thread 线程终止之后才从 thread.join() 返回。也就是说，当线程A执行了线程thread的 join 方法时，会先执行线程thread中的内容，等待从join方法返回之后，才会继续执行线程A方法剩下的内容。...
+            <hr>
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/09/09</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/04</span>
             </div>
             <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM学习笔记">JVM学习笔记</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/05/29/JVM学习笔记-GC（2）/" >
+            
+                <span>JVM学习笔记:GC(2)</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/05/29</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM学习笔记">JVM学习笔记</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/05/28/JVM学习笔记-GC（1）/" >
+            
+                <span>JVM学习笔记: GC（1）</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/05/28</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM学习笔记">JVM学习笔记</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/03/20/JVM学习笔记（一）/" >
+            
+                <span>JVM学习笔记（一）：字节码的编译原理</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/03/20</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM学习笔记">JVM学习笔记</a>
+    
+</div>
             
         </div>
     </article>

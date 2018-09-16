@@ -78,8 +78,6 @@
     <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
     
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    
     <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
 /* This file is meant as a standalone workflow for
 - testing support for link[rel=preload]
@@ -203,8 +201,10 @@
 </head>
 
     
+        <body class="home-body">
     
-<header class="header">
+    
+<header class="header index-header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
@@ -220,21 +220,34 @@
 
 
 
+
+height:50vh;
 ">
     
     <!-- 主页  -->
+    
+    
+    <!-- 文章页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/)"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/index-bg.jpg)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
             
+            fi3ework's Studio.
+            <!-- 文章页  -->
+            
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
+            
+            
+                it's better to burn out than to fade away
+            
+            <!-- 文章页  -->
             
         </p>
         <!-- 文章页meta -->
@@ -346,30 +359,23 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/09/16/每月一牛客—并发篇(1)/" >
+        <a class="abstract-title" href = "/2018/05/28/JVM学习笔记-GC（1）/" >
             
-                <span>每月一牛客———并发篇（2）</span>
+                <span>JVM学习笔记: GC（1）</span>
         </a>
         <div class="abstract-content">
-            SQL 题目2018.9.16
-轮询调度和可抢占式调度
-轮询调度的原理是每一次把来自用户的请求轮流分配给内部中的服务器，从1开始直到N（内部服务器的个数），然后重新开始循环。只有在当前任务主动放弃CPU控制权的情况下（比如任务挂起），才允许其它任务（包括高优先级的任务）控制CPU。它的优点是简洁性，它无需记录当前所有连接的状态，所以它是一种无状态调度，但不利于后面的请求及时得到响应。
-抢占式调度允许高优先级的任务打断当前执行的任务，抢占CPU的控制权。这有利于后面的高优先级任务也能及时得到响应。但实现相对比较复杂且可能出现低优先级的任务长期得不到调度。
-
-
-产生死锁的主要原因
-系统资源不...
+            <hr>
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/09/16</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/05/28</span>
             </div>
             <!-- tags  -->
             
             <div class= abstract-tags >
     
-        <a class="post-tag" href="javascript:void(0);" data-tags = "刷题之路">刷题之路</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM学习笔记">JVM学习笔记</a>
     
 </div>
             
@@ -382,30 +388,368 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/09/09/并发编程总结五/" >
+        <a class="abstract-title" href = "/2018/04/24/关于线程的一些总结/" >
             
-                <span>[Untitled Post]</span>
+                <span>关于线程的一些总结</span>
         </a>
         <div class="abstract-content">
-            并发编程总结五今天我从一篇博客上看到关于并发编程面试的15个问题，自己也是一个小菜，想通过查阅大量资料找出这15个问题的详细答案…
-1、现在有线程T1、T2和T3。你如何确保T2线程在T1之后执行，并且T3线程在T2之后执行？
-
-​    这个问题主要是考察 join( ) 方法的应用，如果一个线程A执行了 thread.join() 语句，其含义是：当前线程A等待 thread 线程终止之后才从 thread.join() 返回。也就是说，当线程A执行了线程thread的 join 方法时，会先执行线程thread中的内容，等待从join方法返回之后，才会继续执行线程A方法剩下的内容。...
+            <hr>
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/09/09</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/04/24</span>
             </div>
             <!-- tags  -->
             
         </div>
     </article>
     
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/03/20/JVM学习笔记（一）/" >
+            
+                <span>JVM学习笔记（一）：字节码的编译原理</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/03/20</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JVM学习笔记">JVM学习笔记</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/03/10/netty总结三/" >
+            
+                <span>netty总结三</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/03/10</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Netty 我有话说">Netty 我有话说</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/03/05/netty总结二/" >
+            
+                <span>netty总结二</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/03/05</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Netty 我有话说">Netty 我有话说</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/02/20/并发编程总结三/" >
+            
+                <span>并发编程总结三</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/02/20</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "并发">并发</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/02/18/netty-总结一/" >
+            
+                <span>netty 总结一</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/02/18</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Netty 我有话说">Netty 我有话说</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/02/12/Lumbda表达式常见例子/" >
+            
+                <span>Lambda表达式常见例子</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/02/12</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Java小技巧">Java小技巧</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/02/12/并发编程总结四/" >
+            
+                <span>并发编程总结四</span>
+        </a>
+        <div class="abstract-content">
+            
+Executor框架结构
+任务：包括被执行任务需要实现的接口：Runnable 接口或者 Callable 接口
+任务的执行：继承自Executor的ExecutorService接口。Executor 框架有两个关键类实现了ExecutorService 接口，分别是ThreadPoolExecutor 和 ScheduledThreadPoolExecutor 
+异步计算的结果：包括接口Furure 和 实现Future 接口的FutureTask 
+
+实现流程
+主线程首先要创建实现Runnable 或者 Callable 接口的任务对象
+然后可以把Runnable 对象直接交给E...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/02/12</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "并发">并发</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href = "/2018/02/06/SpringBoot实现限制IP访问次数/" >
+            
+                <span>SpringBoot实现限制IP访问次数</span>
+        </a>
+        <div class="abstract-content">
+            <hr>
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/02/06</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "SpringBoot">SpringBoot</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
     <!-- paginator  -->
+    
+    <nav class="page-nav">
+        <a class="extend prev" rel="prev" href="/">&#60; PREV</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">NEXT &#62;</a>
+    </nav>
     
 </main>
             <!-- profile -->
+            
+            <div class="profile">
+    <img class="profile-avatar" alt="avatar" src= /avatar/Misaka.jpg >
+    <div class="profile-name">fi3ework</div>
+    
+    <div class="profile-signature">
+        witness me
+    </div>
+    
+    
+    <div class="profile-social">
+        
+    
+        
+            
+                <a href="mailto:12345@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/fi3ework" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/example_qr.png" />
+                </span>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    
+        <div class="friends">
+            <div>FRIENDS</div>
+            
+                
+                    <span>
+                        <a href= //www.baidu.com target="_black">friendA</a>
+                    </span>
+                
+            
+                
+                    <span>
+                        <a href= //www.google.com target="_black">friendB</a>
+                    </span>
+                
+            
+                
+            
+        </div>
+    
+    
+        <div class="about-me">
+            <a href = "/about" >ABOUT ME</a>
+        </div>
+    
+</div>
             
         </div>
         <footer class="footer footer-unloaded">
