@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Wilder Gao">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Wilder Gao">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>并发编程总结二 · Wilder&#39;s Blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/wilder.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Wilder&#39;s Blog.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">并发编程总结二</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Wilder's Blog.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            并发编程总结二
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "并发">并发</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">5.2k</span>阅读时长: <span class="post-count reading-time">18 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/02/05</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <a id="more"></a>
+<h1 id="java关于并发的总结之二"><a href="#java关于并发的总结之二" class="headerlink" title="java关于并发的总结之二"></a>java关于并发的总结之二</h1><h2 id="内存模型基础"><a href="#内存模型基础" class="headerlink" title="内存模型基础"></a>内存模型基础</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;在并发编程中，需要处理两个关键问题：线程之间如何通信以及线程之间如何同步。通信是指线程之间以何种机制来交换信息。在命令式编程中，线程之间的通信机制有两种：共享内存和消息传递。<br>&nbsp;&nbsp;&nbsp;&nbsp;java的并发采用的是共享内存模型，java线程之间的通信总是隐式的进行，整个通信过程对程序员完全透明。</p>
+<h3 id="java内存模型的抽象结构"><a href="#java内存模型的抽象结构" class="headerlink" title="java内存模型的抽象结构"></a>java内存模型的抽象结构</h3><p>java线程之间的通信由java内存模型（JMM）控制，JMM决定一个线程对共享变量的写入合适对另一个线程可见。抽象角度来看，JMM定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存中，每个线程都有一个私有的本地内存，本地内存中存储了该线程以读/写共享变量的副本（但本地内存仅是一个抽象概念，并不真实存在，这么说是模拟了一种存储方式）。<br><img src="http://img.blog.csdn.net/20171210151612769?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>如果线程之间要进行通信的话，必须经历下面两个步骤（这里的通信是指线程A写入的数据会被线程B读取到）:</p>
+<ul>
+<li>线程A把本地内存A中更新过的共享变量刷新到主内存中去</li>
+<li>线程B到主内存中读取线程A之前已更新过的共享变量。  </li>
+</ul>
+<h3 id="从源代码到指令序列的重排序"><a href="#从源代码到指令序列的重排序" class="headerlink" title="从源代码到指令序列的重排序"></a>从源代码到指令序列的重排序</h3><p><strong>重排序分为三种类型：</strong></p>
+<ul>
+<li>编译器优化的重排序。</li>
+<li>指令级并行的重排序：如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序。</li>
+<li>内存系统的重排序。由于处理器使用缓存和读/写缓冲区，这使得加载和存储操作看上去可能是在乱序执行。</li>
+</ul>
+<p>1属于编译器重排序，2和3属于处理器重排序。重排序会导致多线程程序出现内存可见性问题，所以对于编译器，JMM的重排序规则会禁止某些特定类型的重排序。对于处理器重排序，JMM的处理器重排序规则会要求java编译器在生成指令时插入特定类型的内存屏障指令，通过内存屏障来禁止特定类型的处理器重排序。</p>
+<h3 id="并发编程模型的分类"><a href="#并发编程模型的分类" class="headerlink" title="并发编程模型的分类"></a>并发编程模型的分类</h3><p><strong>写缓冲区</strong>  </p>
+<ul>
+<li>优点：写缓冲区可以保证指令流水线持续运行，同时通过以批处理的方式刷新写缓冲区，以及合并写缓冲区对同一内存地址的多次写，减少对内存总线的占用。</li>
+<li>缺点：只对当前处理器可见，也就是说处理器对内存的读/写操作的执行顺序，不一定与内存实际发生的顺序一致。比如说：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &#123; </span><br><span class="line">        a = 1       //步骤1</span><br><span class="line">        x = b;      //步骤2</span><br><span class="line">    &#125;</span><br><span class="line">    &#123;</span><br><span class="line">        b = 2;</span><br><span class="line">        y = a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>当线程A运行上半部分，线程B运行下半部分。我们希望得到的结果是x=2，y=3，但因为处理器允许写读重排序（Store-Load重排序），也就是说步骤1和步骤2的运行顺序会发生改变，所以有可能发生一下的情况：<br>内存先初始化了变量a和b，初始化之后a和b赋值为0，这时候步骤1和2进行了重排序，所以x得到的是初始化为0的b，同样y也得到的是0，x和y赋值之后，a=1和b=2才被写入到主内存中。<br>出现这个问题的关键原因就是写缓冲区仅对自己的处理器可见，导致处理器执行内存操作的顺序可能会与内存实际的操作执行顺序不一致。由于现代的处理器都会使用写缓冲区，因此都会允许写-读操作重排序。</p>
+<table>
+<thead>
+<tr>
+<th>处理器\规则</th>
+<th style="text-align:right">Load-Load</th>
+<th style="text-align:right">Load-Store</th>
+<th style="text-align:right">Store-Store</th>
+<th style="text-align:right">Store-Load</th>
+<th style="text-align:right">数据转换</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SPARC-TSO</td>
+<td style="text-align:right">N</td>
+<td style="text-align:right">N</td>
+<td style="text-align:right">N</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">N</td>
+</tr>
+<tr>
+<td>x86</td>
+<td style="text-align:right">N</td>
+<td style="text-align:right">N</td>
+<td style="text-align:right">N</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">N</td>
+</tr>
+<tr>
+<td>IA64</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">N</td>
+</tr>
+<tr>
+<td>SPARC-TSO</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">Y</td>
+<td style="text-align:right">N</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到，不同的处理器都允许写-读重排序，也就是Store-load重排序，对数据转换都不允许，这和上文提到的数据依赖性有关</p>
+<p>为了避免这种错误的发生，保证内存可见性，变了一起在生成指令序列的适当位置会插入内存屏障指令来进行特定类型的处理器重排序。JMM把内存屏障分为四类:</p>
+<ul>
+<li>LoadLoad Barriers：确保Load1数据的装载先于Load2以及所有后续装载指令  </li>
+<li>StoreStore Barriers：确保Store1的数据对其他处理器可见（会使缓存行无效，并刷新到内存中）先于Store2及所有后续存储指令的装载  </li>
+<li>LoadStore Barriers：确保Load1数据装载先于Store2及所有后续存储指令刷新到内存  </li>
+<li>StoreLoad Barriers：确保Store1数据对其他处理器可见（刷新到内存，并且其他处理器的缓存行无效）先于Load2及所有后续装载指令的装载。该指令会使得该屏障之前的所有内存访问指令完成之后，才能执行该屏障之后的内存访问指令。 </li>
+</ul>
+<h3 id="happens-before简介"><a href="#happens-before简介" class="headerlink" title="happens-before简介"></a>happens-before简介</h3><p>在JMM中，如果一个操作执行的结果需要对另一个操作可见，那么这两个操作之间必须要存在happ-before关系。两个操作可以是在一个线程之内，也可以是在不同线程之间。<br>与程序员密切相关的happens-before规则如下：</p>
+<ul>
+<li>程序顺序规则：一个线程中的每个操作，happens-before于该线程中的任意后续操作</li>
+<li>监视器锁规则：对一个锁的解锁，happens-before于随后对这个锁的加锁</li>
+<li>volatile变量规则：对一个volatile域的写，happens-before于任意后续对这个volatile域的读</li>
+<li>传递性：A happens-before B，B happens-before C，则A happens-before C</li>
+</ul>
+<p><strong>注意：</strong> 两个操作之间具有happens-before关系，并不意味着前一个操作必须要在后一个操作之前执行。仅仅要求前一个执行的结果对后一个操作可见。也就是说，假如 A happens-before B 和 B happens-before A 两个执行的结果是相同的，JMM认为这种重排序是合法的。 </p>
+<h2 id="重排序"><a href="#重排序" class="headerlink" title="重排序"></a>重排序</h2><h3 id="数据依赖性"><a href="#数据依赖性" class="headerlink" title="数据依赖性"></a>数据依赖性</h3><p>如果两个操作访问同一个变量，且这两个操作中有一个为写操作，此时这两个操作之间就存在数据依赖性。编译器和处理器在重排序时，会遵守数据依赖性，编译器和处理器不会改变存在数据依赖关系的两个操作的执行顺序。<br><img src="http://img.blog.csdn.net/20171210151543966?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image">  </p>
+<h3 id="as-if-serial语义"><a href="#as-if-serial语义" class="headerlink" title="as-if-serial语义"></a>as-if-serial语义</h3><p>as-if-serial语义的意思是： <strong>不管怎么重排序，（单线程）程序的执行结果不能被改变。编译器和处理器都应该遵循as-if-serial语义</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int a = 1;  //A</span><br><span class="line">int b = 2;      //B</span><br><span class="line">int c = 1 + 2;  //C</span><br></pre></td></tr></table></figure></p>
+<p>因为as-if-serial语义，所以程序执行的顺序只会有两种，分别是 A-B-C  和  B-A-C 执行的结果不会改变。但要注意的是，这种语义仅是针对单线程对重排序的处理，对于多线程来说，重排序依然会对程序产生一些奇奇怪怪的影响。</p>
+<h2 id="顺序一致性"><a href="#顺序一致性" class="headerlink" title="顺序一致性"></a>顺序一致性</h2><p>顺序一致性内存模型是一个理想化参考模型，为程序员提供了极强的内存可见性保证。内存一致性模型有两大特性:</p>
+<ul>
+<li>一个线程中的所有操作都必须按照程序的顺序来执行</li>
+<li>（不管程序是否同步）所有线程都只能看到一个单一的操作执行顺序。在顺序一致性内存模型中，每个造作都必须原子执行且立刻对所有线程可见</li>
+</ul>
+<p><img src="http://img.blog.csdn.net/20171210151516755?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>在概念上，顺序一致性模型有一个单一的全局内存，这个内存通过一个左右摆动的开关可以连接到任意一个线程。同时，每一个线程必须按程序的顺序来执行内存读/写操作。从上图我们可以看出，在任意时间点最多只能有一个线程可以连接到内存。当多个线程并发执行时，图中的开关装置能把所有线程的所有内存读/写操作串行化。  </p>
+<p>假设有两个线程A和B并发执行。其中A线程有三个操作，它们在程序中的顺序是：A1-&gt;A2-&gt;A3。B线程也有三个操作，它们在程序中的顺序是：B1-&gt;B2-&gt;B3。<br>假设这两个线程使用监视器来正确同步：A线程的三个操作执行后释放监视器，随后B线程获取同一个监视器。那么程序在顺序一致性模型中的执行效果将如下图所示：<br><img src="http://img.blog.csdn.net/20171210151452885?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>假设这两个线程没有同步，那么在顺序一致性模型中执行的结果也会是一致的:<br><img src="http://img.blog.csdn.net/20171210151412011?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>但是，这仅仅是一个理想化的模型，JMM在执行中并没有这个保证，因此在多线程执行的过程中还是存在着重排序带来的一系列问题。</p>
+<h2 id="volatile-内存语义"><a href="#volatile-内存语义" class="headerlink" title="volatile 内存语义"></a>volatile 内存语义</h2><h3 id="vloatile-的特性"><a href="#vloatile-的特性" class="headerlink" title="vloatile 的特性"></a>vloatile 的特性</h3><p><strong>一个volatile变量的单个读/写操作，与一个普通变量的读/写操作都是使用同一个锁来同步，他们之间的执行效果相同。</strong><br>简而言之，volatile变量自身具有以下特性：</p>
+<ul>
+<li>可见性：对一个volatile变量的读，总是能看到（任意线程）对这个volatile变量最后的写入</li>
+<li>原子性：对任意单个volatile变量的读/写具有原子性，对于符合操作便不具有原子性。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">class VolatileFeaturesExample&#123;</span><br><span class="line">    volatile long v1 = 0L;</span><br><span class="line">    public void set(long l)&#123;</span><br><span class="line">        v1 = l;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public void getAndIncrement()&#123;</span><br><span class="line">        v1++;</span><br><span class="line">    &#125;</span><br><span class="line">    public long get()&#123;</span><br><span class="line">        return v1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">class VolatileFeaturesExample&#123;</span><br><span class="line">    long v1 = 0L;</span><br><span class="line">     public synchronized void set(long l)&#123;</span><br><span class="line">        v1 = l;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public void getAndIncrement()&#123;</span><br><span class="line">        v1++;</span><br><span class="line">    &#125;</span><br><span class="line">    public synchronized long get()&#123;</span><br><span class="line">        return v1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="volatile-写-读的内存语义"><a href="#volatile-写-读的内存语义" class="headerlink" title="volatile 写-读的内存语义"></a>volatile 写-读的内存语义</h3><ul>
+<li><p>当写一个volatile变量时，JMM会把该线程对应的本地内存的共享变量刷新到主内存</p>
+<p>  <img src="http://img.blog.csdn.net/20171210151828943?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>  由图可知，flag是一个volatile变量，当线程A书写变量flag为true时，会将变量值写到共享内存中，这时候本地内存B中包含的变量值已经无效，线程B必须从共享内存中读取flag的值。<br>  将volatile写和读两个步骤综合起来看的话，在线程B读一个volatile变量后，写线程A在写这个volatile变量之前所有可见的共享变量的值都将立即变得对线程B可见。</p>
+</li>
+<li><p>总结（线程之间通信的实现）：</p>
+<ul>
+<li>线程A写一个volatile变量，实质上是线程A向接下来将要读这个volatile变量的某个线程发出了（对共享变量所做修改的）消息。</li>
+<li>线程B读一个volatile变量，实质上是线程B接收了之前某个线程发出的（写在这个volatile变量之前对共享变量所做修改的）消息。</li>
+</ul>
+</li>
+</ul>
+<h3 id="volatile-内存语义的实现"><a href="#volatile-内存语义的实现" class="headerlink" title="volatile 内存语义的实现"></a>volatile 内存语义的实现</h3><p><img src="http://img.blog.csdn.net/20171210151805668?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>从图中可以看出：<br>当第二个操作为volatile写时，一律不允许重排序；<br>当第一个操作为volatile写时，一律不允许重排序操作；<br>当第一个操作是volatile写，第二个操作是volatile读时，不允许重排序操作</p>
+<p>因此为了实现volatile的内存语义，编译器在生成字节码时，会在指令序列中插入<strong>内存屏障</strong>来禁止特定类型的处理器重排序。</p>
+<ul>
+<li>在每个volatile写操作前插入StoreStore屏障</li>
+<li>在每个volatile写操作后插入StoreLoad屏障</li>
+<li>在每个volatile读操作前面插入LoadLoad屏障</li>
+<li>在每个volatile读操作后面插入StoreLoad屏障</li>
+</ul>
+<p><img src="http://img.blog.csdn.net/20171210151744793?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"></p>
+<p>实际执行的时候，只要不改变volatile写-读的内存语义，编译器可以根据具体情况省略不必要的屏障。<br><img src="http://img.blog.csdn.net/20171210151725040?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>最后的StoreLoad屏障编译器在编译的时候都会加上，因为不知道在volatile写之后到底会执行什么操作（假如是return操作的话就没有必要写这个屏障）,但是编译器保险起见都会加上这个屏障。<br>从这里可以看出，编译器会自动的省略掉没有必要的屏障，但要保障结果的正常。<br>由于不同的处理器有不同的“松紧度”的处理器内存模型，内存屏障的插入还可以根据具体的处理器内存模型继续优化。<br>例如X86的处理器仅仅会对写-读操作进行重排序，因此对于上述的图中的叙述，LoadLoad屏障、LoadStore屏障和SotreStore屏障将不会被处理器加入，只留下一个StoreLoad屏障。</p>
+<h2 id="锁和final的内存语义"><a href="#锁和final的内存语义" class="headerlink" title="锁和final的内存语义"></a>锁和final的内存语义</h2><h3 id="锁的内存语义"><a href="#锁的内存语义" class="headerlink" title="锁的内存语义"></a>锁的内存语义</h3><h4 id="锁的释放-获取建立的happens-before关系"><a href="#锁的释放-获取建立的happens-before关系" class="headerlink" title="锁的释放-获取建立的happens-before关系"></a>锁的释放-获取建立的happens-before关系</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">class MonitorExample&#123;</span><br><span class="line">    int a = 0;</span><br><span class="line">    public synchronized void writer()&#123;      //1</span><br><span class="line">        a++;                                //2        </span><br><span class="line">    &#125;                                       //3</span><br><span class="line">    </span><br><span class="line">    public synchronized void reader()&#123;      //4</span><br><span class="line">        int i = a ;                         //5</span><br><span class="line">    &#125;                                       //6</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当线程A执行writer()方法，线程B执行reader()方法，根据happens-before规则可知：</p>
+<ul>
+<li>根据程序次序规则，1 happens-before 2，2&gt;3 , 4&gt;5 , 5&gt;6</li>
+<li>根据监视器锁规则，3&gt;4</li>
+<li>根据happens-before 的传递性，2&gt;5，因此会当线程A写入a的值之后，线程B才会读取到最新的a值<br><img src="http://img.blog.csdn.net/20171210151952750?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br><strong>也就是说</strong>，线程A在释放锁之前所有可见的共享变量，在线程B获得同一个锁之后，将立刻变得对B线程可见  <h3 id="锁的释放和获取的内存语义"><a href="#锁的释放和获取的内存语义" class="headerlink" title="锁的释放和获取的内存语义"></a>锁的释放和获取的内存语义</h3>当线程释放锁时，JMM会把该线程对应的本地内存中的共享变量刷新到主内存中。在另一个线程获取锁时，JMM会把线程对应的本地内存置为无效。从而使得被监视器保护的临界代码必须从住内存中读取共享变量。<br><strong>可以看出，锁的释放-获得内存语义和volatile写-读的内存语义有着相同之处：</strong></li>
+<li>线程A释放一个锁，实际上是线程A向接下来将要获取这个锁的某个线程发出（线程A对共享变量所做的修改）消息</li>
+<li>线程B获取一个锁，实质上是线程B接受了之前某个线程发出的（在释放这个锁之前对共享变量所做修改的）消息</li>
+<li>线程A释放锁，随后线程B获取这个锁，这个过程实质上是线程A通过主内存向线程B发送消息。</li>
+</ul>
+<h3 id="锁内存语义的实现"><a href="#锁内存语义的实现" class="headerlink" title="锁内存语义的实现"></a>锁内存语义的实现</h3><p>  <a href="http://blog.csdn.net/luonanqin/article/details/41871909" target="_blank" rel="noopener">完美解释ReentrantLock的博客</a><br>  从这篇博客中可以看到，在ReentrantLock中分为公平锁和非公平锁，两者的区别在于多个Node连起来的虚拟队列，队列中有head和tail。针对公平锁，head是不带线程的特殊Node，只有next，而最新一个请求锁的线程取锁失败时就把它添加到队尾，也就是tail。但是对于非公平锁，新请求锁的线程就会插队，也许会插到最前面，也许不会。<br>  总的来说，公平锁和非公平锁的不同在于：</p>
+<ul>
+<li>公平锁在释放锁的最后写volatile变量state，在获取锁时首先读这个volatile变量。根据volatile的happens-before规则，释放所的线程在写volatile变量之前可见的共享变量，在获得锁的线程读取同一个volatile变量之后将立即变得对获取锁的线程可见。</li>
+<li><p>非公平锁中实现真正开始加锁的源代码为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">protected final boolean compareAndSetState(int expect , int update)&#123;</span><br><span class="line">    return unsafe.compareAndSwapInt(this,stateOffset,expect,update);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此操作具有volatile读和写的内存语义，从处理器的角度来看的话，程序会根据当前处理器的类型来决定是否为cmpxchg指令添加lock前缀。如果程序在多处理器上运行则加上lock前缀，如果在单处理器上运行则不需要加上lock前缀。由于汇编代码加上lock前缀正是volatile语义的实现，因此具有volatile读和写的内存语义。</p>
+</li>
+<li>总的来说，锁的释放-获取内存语义的实现至少有以下两种方式：<ul>
+<li>利用volatile变量的写-读所具有的内存语义</li>
+<li>利用CAS(compareAndSet)所附带的volatile读和写的内存语义。</li>
+</ul>
+</li>
+</ul>
+<h3 id="final域的内存语义"><a href="#final域的内存语义" class="headerlink" title="final域的内存语义"></a>final域的内存语义</h3><h4 id="final域的重排序规则"><a href="#final域的重排序规则" class="headerlink" title="final域的重排序规则"></a>final域的重排序规则</h4><p>对于final域，编译器和处理器要遵守两个重排序规则</p>
+<ul>
+<li>在构造函数内对一个final域的写入，与随后把这个被构造对象的引用赋值给一个引用变量，这两个操作之间不能重排序</li>
+<li>初次读一个包含final域的对象的引用，与随后初次读这个final域，这两个操作之间不能重排序</li>
+</ul>
+<p>通过一段代码来说明这个问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public class FinalExample&#123;</span><br><span class="line">    int i;</span><br><span class="line">    final int j;</span><br><span class="line">    static FinalExample obj;</span><br><span class="line">    </span><br><span class="line">    public FinalExample()&#123;      //构造函数</span><br><span class="line">        i = 1;</span><br><span class="line">        j = 2;                  //写final域</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public static void writer()&#123;            //线程A执行</span><br><span class="line">        obj = new FinalExample();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public static void reader()&#123;            //线程B执行</span><br><span class="line">        FinalExample object = obj;          //读对象引用</span><br><span class="line">        int a = object.i;                   </span><br><span class="line">        int b = object.j;                   //读final域</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>由上面的两个重排序规则可以得到，在线程A执行将构造对象的引用赋值给一个引用变量，也就是new一个FinalExample时，会先将2赋值给final域j之后，再将这个new的对象赋值为obj，这两个步骤不会重排序。在线程B执行reader方法时，读对象的引用和读final域这两个步骤也不会进行重排序，否则如果先执行读final域时，这个时候object还未被赋值，便有可能会产生异常。</p>
+<h4 id="写final域的重排序规则"><a href="#写final域的重排序规则" class="headerlink" title="写final域的重排序规则"></a>写final域的重排序规则</h4><p>写final域的重排序规则禁止把两个final域的写重排序到构造函数之外，包含两个方面：</p>
+<ul>
+<li>JMM禁止编译器把final域的写重排序到构造函数之外</li>
+<li>编译器会在final域的写之后，构造函数return之前，插入一个StoreStore屏障。这个屏障会禁止处理器把final域的写重排序到构造函数之外。<br>上面的代码中，final域有这样的重排序规则，而对于普通变量则没有这样的规则，所以i = 1 可能会被重排序到构造函数之外。<br><img src="http://img.blog.csdn.net/20171210152122874?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzgwOTUwOTQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image">  </li>
+</ul>
+<h3 id="读final域的重排序规则"><a href="#读final域的重排序规则" class="headerlink" title="读final域的重排序规则"></a>读final域的重排序规则</h3><p>规则为：<strong>在一个线程中，初次读对象引用与初次读该对象包含的final域，JMM禁止处理器重排序这两个操作（仅仅针对编译器）。编译器会在读final域操作的前面插入一个LoadLoad屏障。</strong>  </p>
+<p>在上面那个图可以看到，假如读对象普通域i被重排序到读对象引用obj之前的话，那将会产生错误。所以有final读这个重排序规则之后，假如obj先被线程A初始化了，那么final域的j一定会读取到2，假如还未被线程A初始化，那么读取的将会是null，也不会产生异常。</p>
+<h3 id="final域为引用类型"><a href="#final域为引用类型" class="headerlink" title="final域为引用类型"></a>final域为引用类型</h3><p>对于引用类型，写final域的重排序规则对编译器和处理器增加了如下约束：<strong>在构造函数内对一个final引用对象的写入，与随后在构造函数外把这个被构造对象的引用赋值给一个引用变量，这两个操作之间不能重排序</strong>  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public class FinalExample&#123;</span><br><span class="line">    final int[] intArray;</span><br><span class="line">    static FinalExample obj;</span><br><span class="line">    public FinalExample()&#123;</span><br><span class="line">        intArray = new intp[1];</span><br><span class="line">        intArray[0] = 1;</span><br><span class="line">    &#125;</span><br><span class="line">    public static void writerOne()&#123;     //线程A执行</span><br><span class="line">        obj = new FinalExample();</span><br><span class="line">    &#125;</span><br><span class="line">    public static void writeTwo()&#123;      //线程B执行</span><br><span class="line">        obj.intArray[0] = 2;</span><br><span class="line">    &#125;</span><br><span class="line">    public static void reader()&#123;        //线程C执行</span><br><span class="line">        if(obj != null)&#123;</span><br><span class="line">            int templ = obj.intArray[0];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面的程序可以看到，writerOne()方法执行的时候会先将构造函数执行完毕之后再将之赋值给obj对象，这两个步骤不会进行重排序。由于线程B和线程C存在竞争关系，JMM不能保证线程B的写入对线程C可见，所以templ的结果有可能时1也有可能是2，要解决这个办法，可以加上锁机制，或者使用volatile变量来确保内存的可见性。</p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://wildergao.github.io">Wilder Gao</a>
+            <p>原文链接：<a href="http://wildergao.github.io/2018/02/05/并发编程总结二/">http://wildergao.github.io/2018/02/05/并发编程总结二/</a>
+            <p>发表日期：<a href="http://wildergao.github.io/2018/02/05/并发编程总结二/">February 5th 2018, 11:11:45 pm</a>
+            <p>更新日期：<a href="http://wildergao.github.io/2018/02/05/并发编程总结二/">August 19th 2018, 3:59:30 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/02/06/并发编程总结一/" title= "并发编程总结一">
+                    <div class="nextTitle">并发编程总结一</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+    <div id="lv-container" data-id="city" data-uid= MTAyMC8zOTc1OC8xNjI4NQ==>
+        <script type="text/javascript">
+            (function (d, s) {
+                var j, e = d.getElementsByTagName(s)[0];
+                if (typeof LivereTower === 'function') { return; }
+                j = d.createElement(s);
+                j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+                j.async = true;
+
+                e.parentNode.insertBefore(j, e);
+            })(document, 'script');
+        </script>
+        <noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+    </div>
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:845956752@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/WilderGao" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/example_qr.png" />
+                </span>
+            
+        
+    
+        
+            
+                <a href="https://blog.csdn.net/qq_38095094" class="iconfont-archer csdn" target="_blank" title=csdn></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#java关于并发的总结之二"><span class="toc-number">1.</span> <span class="toc-text">java关于并发的总结之二</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#内存模型基础"><span class="toc-number">1.1.</span> <span class="toc-text">内存模型基础</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#java内存模型的抽象结构"><span class="toc-number">1.1.1.</span> <span class="toc-text">java内存模型的抽象结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#从源代码到指令序列的重排序"><span class="toc-number">1.1.2.</span> <span class="toc-text">从源代码到指令序列的重排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#并发编程模型的分类"><span class="toc-number">1.1.3.</span> <span class="toc-text">并发编程模型的分类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#happens-before简介"><span class="toc-number">1.1.4.</span> <span class="toc-text">happens-before简介</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#重排序"><span class="toc-number">1.2.</span> <span class="toc-text">重排序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#数据依赖性"><span class="toc-number">1.2.1.</span> <span class="toc-text">数据依赖性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#as-if-serial语义"><span class="toc-number">1.2.2.</span> <span class="toc-text">as-if-serial语义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#顺序一致性"><span class="toc-number">1.3.</span> <span class="toc-text">顺序一致性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#volatile-内存语义"><span class="toc-number">1.4.</span> <span class="toc-text">volatile 内存语义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#vloatile-的特性"><span class="toc-number">1.4.1.</span> <span class="toc-text">vloatile 的特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile-写-读的内存语义"><span class="toc-number">1.4.2.</span> <span class="toc-text">volatile 写-读的内存语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile-内存语义的实现"><span class="toc-number">1.4.3.</span> <span class="toc-text">volatile 内存语义的实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#锁和final的内存语义"><span class="toc-number">1.5.</span> <span class="toc-text">锁和final的内存语义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#锁的内存语义"><span class="toc-number">1.5.1.</span> <span class="toc-text">锁的内存语义</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#锁的释放-获取建立的happens-before关系"><span class="toc-number">1.5.1.1.</span> <span class="toc-text">锁的释放-获取建立的happens-before关系</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#锁的释放和获取的内存语义"><span class="toc-number">1.5.2.</span> <span class="toc-text">锁的释放和获取的内存语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#锁内存语义的实现"><span class="toc-number">1.5.3.</span> <span class="toc-text">锁内存语义的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#final域的内存语义"><span class="toc-number">1.5.4.</span> <span class="toc-text">final域的内存语义</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#final域的重排序规则"><span class="toc-number">1.5.4.1.</span> <span class="toc-text">final域的重排序规则</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#写final域的重排序规则"><span class="toc-number">1.5.4.2.</span> <span class="toc-text">写final域的重排序规则</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#读final域的重排序规则"><span class="toc-number">1.5.5.</span> <span class="toc-text">读final域的重排序规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#final域为引用类型"><span class="toc-number">1.5.6.</span> <span class="toc-text">final域为引用类型</span></a></li></ol></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 22
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span><a class="archive-post-title" href= "/2018/09/16/每月一牛客—并发篇(1)/" >每月一牛客———并发篇（2）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/2018/09/12/并发编程总结五/" >并发编程总结五</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/03</span><a class="archive-post-title" href= "/2018/08/03/每月一牛客—数据库篇(2)/" >每月一牛客———数据库篇（2）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href= "/2018/08/01/每日一牛客—数据库篇(2)/" >每日一牛客————数据库篇(2)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href= "/2018/08/01/每月一牛客—Java篇(2)/" >每月一牛客-Java篇(2)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/24</span><a class="archive-post-title" href= "/2018/07/24/每月一牛客—数据库篇(1)/" >每月一牛客——数据库篇(1)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/21</span><a class="archive-post-title" href= "/2018/07/21/JVM学习笔记（二）/" >JVM学习笔记（二）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/15</span><a class="archive-post-title" href= "/2018/07/15/每月一牛客—Java篇(1)/" >每月一牛客—Java篇(1)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span><a class="archive-post-title" href= "/2018/06/04/JVM学习笔记-GC（3）/" >JVM学习笔记-GC（3）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/29</span><a class="archive-post-title" href= "/2018/05/29/JVM学习笔记-GC（2）/" >JVM学习笔记:GC(2)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/28</span><a class="archive-post-title" href= "/2018/05/28/JVM学习笔记-GC（1）/" >JVM学习笔记: GC（1）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span><a class="archive-post-title" href= "/2018/04/24/关于线程的一些总结/" >关于线程的一些总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/2018/03/20/JVM学习笔记（一）/" >JVM学习笔记（一）：字节码的编译原理</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/2018/03/10/netty总结三/" >netty总结三</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/05</span><a class="archive-post-title" href= "/2018/03/05/netty总结二/" >netty总结二</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/20</span><a class="archive-post-title" href= "/2018/02/20/并发编程总结三/" >并发编程总结三</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href= "/2018/02/18/netty-总结一/" >netty 总结一</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/12</span><a class="archive-post-title" href= "/2018/02/12/Lumbda表达式常见例子/" >Lambda表达式常见例子</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/12</span><a class="archive-post-title" href= "/2018/02/12/并发编程总结四/" >并发编程总结四</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/2018/02/06/SpringBoot实现限制IP访问次数/" >SpringBoot实现限制IP访问次数</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/2018/02/06/并发编程总结一/" >并发编程总结一</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/05</span><a class="archive-post-title" href= "/2018/02/05/并发编程总结二/" >并发编程总结二</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="JVM学习笔记"><span class="iconfont-archer">&#xe606;</span>JVM学习笔记</span>
+    
+        <span class="sidebar-tag-name" data-tags="Java小技巧"><span class="iconfont-archer">&#xe606;</span>Java小技巧</span>
+    
+        <span class="sidebar-tag-name" data-tags="SpringBoot"><span class="iconfont-archer">&#xe606;</span>SpringBoot</span>
+    
+        <span class="sidebar-tag-name" data-tags="Netty 我有话说"><span class="iconfont-archer">&#xe606;</span>Netty 我有话说</span>
+    
+        <span class="sidebar-tag-name" data-tags="并发"><span class="iconfont-archer">&#xe606;</span>并发</span>
+    
+        <span class="sidebar-tag-name" data-tags="刷题之路"><span class="iconfont-archer">&#xe606;</span>刷题之路</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Wilder Gao"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
